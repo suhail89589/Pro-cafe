@@ -1,0 +1,156 @@
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+export default function SignupPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const redirect = new URLSearchParams(location.search).get('redirect') || '/';
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await signup(name, email, password, phone, address);
+      navigate(redirect);
+    } catch (err) {
+      setError(err.message || 'Registration failed. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="pt-32 pb-24 min-h-screen bg-[#080808] flex items-center justify-center relative overflow-hidden">
+      {/* Background Mandala overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/mandala-ornament.png')] scale-150" />
+      
+      <div className="w-full max-w-md p-8 md:p-10 rounded-[2.5rem] bg-[#111] border border-white/5 shadow-2xl relative z-10 mx-4">
+        <div className="text-center mb-8">
+          <span className="text-cafe-brown font-mono tracking-[0.4em] uppercase text-[10px] block">
+            Join the Imperial Feast
+          </span>
+          <h2 className="text-4xl font-bold font-[Playfair_Display] text-white mt-2">
+            Create Account
+          </h2>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 rounded-2xl bg-red-900/20 border border-red-900/30 text-red-400 text-sm text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">
+              Full Name
+            </label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+              className="w-full px-5 py-3.5 rounded-2xl bg-black border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cafe-brown transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="john@example.com"
+              className="w-full px-5 py-3.5 rounded-2xl bg-black border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cafe-brown transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">
+              Phone Number
+            </label>
+            <input
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+91 XXXXX XXXXX"
+              className="w-full px-5 py-3.5 rounded-2xl bg-black border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cafe-brown transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">
+              Delivery Address
+            </label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Apartment, Street Name, City"
+              className="w-full px-5 py-3.5 rounded-2xl bg-black border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cafe-brown transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-5 py-3.5 rounded-2xl bg-black border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cafe-brown transition-colors"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 bg-cafe-brown hover:bg-white hover:text-black text-white font-bold rounded-2xl uppercase tracking-widest text-xs transition-all flex items-center justify-center mt-2"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              'Create Account'
+            )}
+          </button>
+        </form>
+
+        <p className="mt-8 text-center text-sm text-gray-500">
+          Already have an account?{' '}
+          <Link
+            to={`/login?redirect=${encodeURIComponent(redirect)}`}
+            className="text-cafe-brown hover:text-white font-semibold transition-colors"
+          >
+            Sign in
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
